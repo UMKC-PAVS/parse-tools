@@ -11,7 +11,7 @@ import os
 import sys
 import pandas as pd
 from make_plots import make_plots
-'''
+
 python_version = sys.version_info
 
 if python_version.major == 3:
@@ -36,8 +36,7 @@ elif python_version.major == 2:
 else:
     
     raise Exception('something is wrong with your Python version')
-'''
-path = 'C:/Users/thoma/Documents/Work/test_files'
+
 # change to the directory where we will be processing the files
 os.chdir(path)
 
@@ -146,16 +145,19 @@ for current_filename in files:
             # print report of files processed
             print('File converted: '+current_filename)
             
-        except IOError as err:
-            print(path+'/'+current_filename+' not found. Error is {0}'.format(err))
+        except (IOError,pd.errors.EmptyDataError) as err:
+            print('An Error occured. Error is {0}'.format(err))
             
     else:
         print(current_filename+' already processed')
         
     if DoMakePlots:
+        try:
             # call the make_plots function and pass it the right file
             make_plots(dir_name+'/Flight_Data/combined/'+dir_name+'_results.csv')
-
+            
+        except IOError as err:
+            print('An Error occured. Error is {0}'.format(err))
     else:
         print('Plots already plotted for '+current_filename)
 
