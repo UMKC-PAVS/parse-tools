@@ -17,15 +17,15 @@ import glob
 import pandas as pd
 
 #Overarching folder that holds subfolders with combined files
-src_dir = "Insertdirectory"
+src_dir = r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\075'
 #Directory for degradation files
-dst_dir= "Insertdestination"
+dst_dir= r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\complete'
 for root, dirs, files in os.walk(src_dir):
     for f in files:
         if f.endswith('Data.csv'):
             shutil.copy(os.path.join(root,f), dst_dir)
-        if f.endswith('Statistics.csv'):
-            shutil.copy(os.path.join(root,f), dst_dir)
+        #if f.endswith('Statistics.csv'):
+         #   shutil.copy(os.path.join(root,f), dst_dir)
             
 os.chdir(dst_dir)
 
@@ -39,3 +39,6 @@ for filename in all_files:
     
 frame = pd.concat(lis)
 
+frame = frame.drop(['Unnamed: 0'],axis=1)
+
+frame.to_csv('PX4-075.csv')
