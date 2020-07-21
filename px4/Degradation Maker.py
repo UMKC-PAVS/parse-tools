@@ -46,13 +46,15 @@ from subprocess import call
 
 
 #NOTE: If you do not use forward slashes instead of backslashes you must put it in the format of r'path' with no backslashes at the end of the path. Python will give you an error otherwise due to unicode
-directorypath = r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\075'
+directorypath = r'C:\Users\cuav\Documents\Python Scripts\075'
 
 os.chdir(directorypath)
 
 #Set to 0 if group, sequential and rep need to be added
 
 file_list = []
+averages = []
+deviations = []
 
 qq = 0
 if qq == 0:
@@ -68,8 +70,29 @@ if qq == 0:
             df3.insert(1,'Group',Group2)
             df3.insert(2,'Rep',Repitition)
             file_list.append(df3)
-                        
-
+            mean = df3.mean()
+            stdev = df3.std()
+            mean = mean.to_frame()
+            stdev = stdev.to_frame()
+            mean.columns = ['Mean']
+            stdev.columns = ['Stdev']
+            mean.insert(1,'Stdev',stdev)
+           
+            '''
+            stdev = stdev.transpose()
+            stdev = stdev[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_0_gyro_rad[1]','sensor_combined_0_gyro_rad[2]','sensor_combined_0_accelerometer_m_s2[0]','sensor_combined_0_accelerometer_m_s2[1]','sensor_combined_0_accelerometer_m_s2[2]','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
+            stdev = stdev.rename(columns= {'sensor_combined_0_gyro_rad[0]':'GyroX','sensor_combined_0_gyro_rad[1]':'GyroY','sensor_combined_0_gyro_rad[2]':'GyroZ','sensor_combined_0_accelerometer_m_s2[0]':'AccelX','sensor_combined_0_accelerometer_m_s2[1]':'AccelY','sensor_combined_0_accelerometer_m_s2[2]':'AccelZ','vehicle_magnetometer_0_magnetometer_ga[0]':'MagX','vehicle_magnetometer_0_magnetometer_ga[1]':'MagY','vehicle_magnetometer_0_magnetometer_ga[2]':'MagZ'})
+            stdev = stdev.drop(columns=['Seq'])
+            stdev = stdev.assign(Group=mean['Group'])
+            #stdev = mean['Rep'].values
+            '''           
+            
+            mean = mean.transpose()
+            mean = mean[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_0_gyro_rad[1]','sensor_combined_0_gyro_rad[2]','sensor_combined_0_accelerometer_m_s2[0]','sensor_combined_0_accelerometer_m_s2[1]','sensor_combined_0_accelerometer_m_s2[2]','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
+            mean = mean.rename(columns= {'sensor_combined_0_gyro_rad[0]':'GyroX','sensor_combined_0_gyro_rad[1]':'GyroY','sensor_combined_0_gyro_rad[2]':'GyroZ','sensor_combined_0_accelerometer_m_s2[0]':'AccelX','sensor_combined_0_accelerometer_m_s2[1]':'AccelY','sensor_combined_0_accelerometer_m_s2[2]':'AccelZ','vehicle_magnetometer_0_magnetometer_ga[0]':'MagX','vehicle_magnetometer_0_magnetometer_ga[1]':'MagY','vehicle_magnetometer_0_magnetometer_ga[2]':'MagZ'})
+            mean = mean.drop(columns=['Seq'])
+            averages.append(mean)
+            #deviations.append(stdev)
 
 #This will create the other files. Please use pip to install pyulog within the console beforehand if not done so before. You will need to restart kernel using Ctrl + . as well
 
@@ -84,11 +107,15 @@ os.chdir(directorypath)
 
 #combine all files in the list
 combined_csv = pd.concat(file_list,ignore_index=True)
+Aves = pd.concat(averages,ignore_index=False)
+Aves = Aves.mask(Aves == 0).ffill()
+
+
 #export to csv
 #name = current_file.replace('.ulg','.csv')
 #combined_csv.to_csv( name, index=False, encoding='utf-8-sig')
 
-combined_csv.to_csv('data.csv')
+#combined_csv.to_csv('data.csv')
 
 #Reads the new combined file
 data = combined_csv
@@ -97,6 +124,7 @@ data = combined_csv
 df = data[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_0_gyro_rad[1]','sensor_combined_0_gyro_rad[2]','sensor_combined_0_accelerometer_m_s2[0]','sensor_combined_0_accelerometer_m_s2[1]','sensor_combined_0_accelerometer_m_s2[2]']]
 
 df = df.rename(columns= {'sensor_combined_0_gyro_rad[0]':'GyroX','sensor_combined_0_gyro_rad[1]':'GyroY','sensor_combined_0_gyro_rad[2]':'GyroZ','sensor_combined_0_accelerometer_m_s2[0]':'AccelX','sensor_combined_0_accelerometer_m_s2[1]':'AccelY','sensor_combined_0_accelerometer_m_s2[2]':'AccelZ'})
+
 
 #For Magnetometer Data
 df2 = data[['Group','Seq','Rep','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
@@ -109,6 +137,7 @@ df2 = df2.dropna()
 
 
 #Find the mean and stdev values of each column, create new dataframe with those values
+'''
 mean = df.mean()
 stdev = df.std()
 
@@ -131,9 +160,11 @@ mean.insert(1,'Stdev',stdev)
 mean2.columns = ['Mean']
 mean2.insert(1,'Stdev',stdev2)
 
-mean.drop(index=['Group','Rep','Seq'])
-mean2.drop(index=['Group','Rep','Seq'])
+#mean.drop(index=['Group','Rep','Seq'])
+#mean2.drop(index=['Group','Rep','Seq'])
+'''
 
+'''
 #This provides us the length of the current data so it can be used to make new columns
 N = len(df.index)
 NN = len(df2.index)
@@ -194,3 +225,17 @@ if zz == 1:
     df2.to_csv(name5,index=False)
     mean.to_csv(name3,index=True)
     mean2.to_csv(name4,index=True)
+'''
+
+path = os.getcwd()
+directory = os.path.join(path,r'Degradation Data')
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
+
+#Changes directory to put it into the new folder
+os.chdir(directory)
+    
+Comp_Data = pd.concat([df,df2],ignore_index=True)
+Comp_Data.to_csv('PX4-075-Data.csv',index=False)
+Aves.to_csv('Statistics.csv',index=True)
