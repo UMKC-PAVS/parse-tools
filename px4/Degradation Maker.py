@@ -20,22 +20,12 @@ Adds a second file for the mean and stdev
 Typo fixes
 FUTURE WORK: Only works for 1 file at a time currently, add functionality for multiple files
 
-
 7/19/20 Complete Rebuild for old test files with wrong naming structure
 
 7/20/20 Fixed average and stdev
 Removes csv writing in favor of xlsx writing
 Removes lots of no longer used code and general tidiness improvements WIP
 Leaves in call function for ulog2csv, may remove in future updates
-
-
-
-"""
-
-
-"""
-README: This program is meant for a workflow where once somebody gets a PX4 log file off the cube it goes for immediate processing while the team gets the next drone ready to get logs off
-Therefore, it is meant for folders empty of other csv files, as it does not check for specific csvs within the directory but every file in the directory.
 
 
 """
@@ -50,7 +40,7 @@ from subprocess import call
 
 
 #NOTE: If you do not use forward slashes instead of backslashes you must put it in the format of r'path' with no backslashes at the end of the path. Python will give you an error otherwise due to unicode
-directorypath = r'C:\Users\cuav\Documents\Python Scripts\075'
+directorypath = r'C:\Users\cuav\Documents\Python Scripts\071'
 
 os.chdir(directorypath)
 
@@ -80,14 +70,22 @@ if qq == 0:
             stdev = stdev.to_frame()
             mean.columns = ['Mean']
             stdev.columns = ['Stdev']
-            mean.insert(1,'Stdev',stdev)
+                       
             
             mean = mean.transpose()
             mean = mean[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_0_gyro_rad[1]','sensor_combined_0_gyro_rad[2]','sensor_combined_0_accelerometer_m_s2[0]','sensor_combined_0_accelerometer_m_s2[1]','sensor_combined_0_accelerometer_m_s2[2]','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
             mean = mean.rename(columns= {'sensor_combined_0_gyro_rad[0]':'GyroX','sensor_combined_0_gyro_rad[1]':'GyroY','sensor_combined_0_gyro_rad[2]':'GyroZ','sensor_combined_0_accelerometer_m_s2[0]':'AccelX','sensor_combined_0_accelerometer_m_s2[1]':'AccelY','sensor_combined_0_accelerometer_m_s2[2]':'AccelZ','vehicle_magnetometer_0_magnetometer_ga[0]':'MagX','vehicle_magnetometer_0_magnetometer_ga[1]':'MagY','vehicle_magnetometer_0_magnetometer_ga[2]':'MagZ'})
             mean = mean.drop(columns=['Seq'])
+            
+            stdev = stdev.transpose()
+            stdev = stdev[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_0_gyro_rad[1]','sensor_combined_0_gyro_rad[2]','sensor_combined_0_accelerometer_m_s2[0]','sensor_combined_0_accelerometer_m_s2[1]','sensor_combined_0_accelerometer_m_s2[2]','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
+            stdev = stdev.rename(columns= {'sensor_combined_0_gyro_rad[0]':'GyroX','sensor_combined_0_gyro_rad[1]':'GyroY','sensor_combined_0_gyro_rad[2]':'GyroZ','sensor_combined_0_accelerometer_m_s2[0]':'AccelX','sensor_combined_0_accelerometer_m_s2[1]':'AccelY','sensor_combined_0_accelerometer_m_s2[2]':'AccelZ','vehicle_magnetometer_0_magnetometer_ga[0]':'MagX','vehicle_magnetometer_0_magnetometer_ga[1]':'MagY','vehicle_magnetometer_0_magnetometer_ga[2]':'MagZ'})
+            stdev = stdev.drop(columns=['Seq'])
+            stdev['Group'] = mean['Group'].values
+            stdev['Rep'] = mean['Rep'].values
+            
             averages.append(mean)
-            #deviations.append(stdev)
+            deviations.append(stdev)
 
 #This will create the other files. Please use pip to install pyulog within the console beforehand if not done so before. You will need to restart kernel using Ctrl + . as well
 
@@ -103,7 +101,7 @@ os.chdir(directorypath)
 #combine all files in the list
 combined_csv = pd.concat(file_list,ignore_index=True)
 Aves = pd.concat(averages,ignore_index=False)
-Aves = Aves.mask(Aves == 0).ffill()
+Devs = pd.concat(deviations,ignore_index=False)
 
 
 #Reads the new combined file
@@ -114,9 +112,11 @@ df = data[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_
 
 df = df.rename(columns= {'sensor_combined_0_gyro_rad[0]':'GyroX','sensor_combined_0_gyro_rad[1]':'GyroY','sensor_combined_0_gyro_rad[2]':'GyroZ','sensor_combined_0_accelerometer_m_s2[0]':'AccelX','sensor_combined_0_accelerometer_m_s2[1]':'AccelY','sensor_combined_0_accelerometer_m_s2[2]':'AccelZ'})
 
+
 #For Magnetometer Data
 df2 = data[['Group','Seq','Rep','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
 df2 = df2.rename(columns= {'vehicle_magnetometer_0_magnetometer_ga[0]':'MagX','vehicle_magnetometer_0_magnetometer_ga[1]':'MagY','vehicle_magnetometer_0_magnetometer_ga[2]':'MagZ'})
+
 
 #This deletes any rows that have null values
 df = df.dropna()
@@ -132,8 +132,9 @@ if not os.path.exists(directory):
 #Changes directory to put it into the new folder
 os.chdir(directory)
 
-Comb_Data = pd.ExcelWriter('PX4-075-Data.xlsx', engine='xlsxwriter')
+Comb_Data = pd.ExcelWriter('PX4-071-Data.xlsx', engine='xlsxwriter')
 df.to_excel(Comb_Data,sheet_name='Accel&Gyro',index=False)
 df2.to_excel(Comb_Data,sheet_name='Magnetometer',index=False)
-Aves.to_excel(Comb_Data,sheet_name='Mean&Stdev')
+Aves.to_excel(Comb_Data,sheet_name='Mean')
+Devs.to_excel(Comb_Data,sheet_name='Stdev')
 Comb_Data.save()    
