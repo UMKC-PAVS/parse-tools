@@ -21,17 +21,21 @@ Typo fixes
 FUTURE WORK: Only works for 1 file at a time currently, add functionality for multiple files
 
 
+7/19/20 Complete Rebuild for old test files with wrong naming structure
 
-WARNING: ulg file MUST use proper naming structure or the new columns will be incorrect
+7/20/20 Fixed average and stdev
+Removes csv writing in favor of xlsx writing
+Removes lots of no longer used code and general tidiness improvements WIP
+Leaves in call function for ulog2csv, may remove in future updates
+
+
+
 """
 
 
 """
 README: This program is meant for a workflow where once somebody gets a PX4 log file off the cube it goes for immediate processing while the team gets the next drone ready to get logs off
 Therefore, it is meant for folders empty of other csv files, as it does not check for specific csvs within the directory but every file in the directory.
-
-
-The directory must be changed to the new folder in order to get the file. Please copy and paste the folder path to the ulg file you are looking to get csvs and analysis. This is found on line 49 of the code
 
 
 """
@@ -77,15 +81,6 @@ if qq == 0:
             mean.columns = ['Mean']
             stdev.columns = ['Stdev']
             mean.insert(1,'Stdev',stdev)
-           
-            '''
-            stdev = stdev.transpose()
-            stdev = stdev[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_0_gyro_rad[1]','sensor_combined_0_gyro_rad[2]','sensor_combined_0_accelerometer_m_s2[0]','sensor_combined_0_accelerometer_m_s2[1]','sensor_combined_0_accelerometer_m_s2[2]','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
-            stdev = stdev.rename(columns= {'sensor_combined_0_gyro_rad[0]':'GyroX','sensor_combined_0_gyro_rad[1]':'GyroY','sensor_combined_0_gyro_rad[2]':'GyroZ','sensor_combined_0_accelerometer_m_s2[0]':'AccelX','sensor_combined_0_accelerometer_m_s2[1]':'AccelY','sensor_combined_0_accelerometer_m_s2[2]':'AccelZ','vehicle_magnetometer_0_magnetometer_ga[0]':'MagX','vehicle_magnetometer_0_magnetometer_ga[1]':'MagY','vehicle_magnetometer_0_magnetometer_ga[2]':'MagZ'})
-            stdev = stdev.drop(columns=['Seq'])
-            stdev = stdev.assign(Group=mean['Group'])
-            #stdev = mean['Rep'].values
-            '''           
             
             mean = mean.transpose()
             mean = mean[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_0_gyro_rad[1]','sensor_combined_0_gyro_rad[2]','sensor_combined_0_accelerometer_m_s2[0]','sensor_combined_0_accelerometer_m_s2[1]','sensor_combined_0_accelerometer_m_s2[2]','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
@@ -111,12 +106,6 @@ Aves = pd.concat(averages,ignore_index=False)
 Aves = Aves.mask(Aves == 0).ffill()
 
 
-#export to csv
-#name = current_file.replace('.ulg','.csv')
-#combined_csv.to_csv( name, index=False, encoding='utf-8-sig')
-
-#combined_csv.to_csv('data.csv')
-
 #Reads the new combined file
 data = combined_csv
 
@@ -125,107 +114,14 @@ df = data[['Group','Seq','Rep','sensor_combined_0_gyro_rad[0]','sensor_combined_
 
 df = df.rename(columns= {'sensor_combined_0_gyro_rad[0]':'GyroX','sensor_combined_0_gyro_rad[1]':'GyroY','sensor_combined_0_gyro_rad[2]':'GyroZ','sensor_combined_0_accelerometer_m_s2[0]':'AccelX','sensor_combined_0_accelerometer_m_s2[1]':'AccelY','sensor_combined_0_accelerometer_m_s2[2]':'AccelZ'})
 
-
 #For Magnetometer Data
 df2 = data[['Group','Seq','Rep','vehicle_magnetometer_0_magnetometer_ga[0]','vehicle_magnetometer_0_magnetometer_ga[1]','vehicle_magnetometer_0_magnetometer_ga[2]']]
 df2 = df2.rename(columns= {'vehicle_magnetometer_0_magnetometer_ga[0]':'MagX','vehicle_magnetometer_0_magnetometer_ga[1]':'MagY','vehicle_magnetometer_0_magnetometer_ga[2]':'MagZ'})
-
 
 #This deletes any rows that have null values
 df = df.dropna()
 df2 = df2.dropna()
 
-
-#Find the mean and stdev values of each column, create new dataframe with those values
-'''
-mean = df.mean()
-stdev = df.std()
-
-mean2 = df2.mean()
-stdev2 = df2.std()
-
-
-mean = mean.to_frame()
-stdev = stdev.to_frame()
-
-mean2 = mean2.to_frame()
-stdev2 = stdev2.to_frame()
-
-
-#Combine the mean and stdev dataframes
-
-mean.columns = ['Mean']
-mean.insert(1,'Stdev',stdev)
-
-mean2.columns = ['Mean']
-mean2.insert(1,'Stdev',stdev2)
-
-#mean.drop(index=['Group','Rep','Seq'])
-#mean2.drop(index=['Group','Rep','Seq'])
-'''
-
-'''
-#This provides us the length of the current data so it can be used to make new columns
-N = len(df.index)
-NN = len(df2.index)
-
-#Group number is in 8th index of file name, Rep is 12th ONLY if naming structure does not change
-
-
-if zz == 1:
-    Number = name[8]
-    Rep = name[12]
-    Group = [Number] * N
-    Repit = [Rep] * N
-    Group3 = [Number] * NN
-    Repit3 = [Rep] * NN
-
-    seq = list(range(1,N+1))
-    seq2 = list(range(1,NN+1))
-#Insert these columns in their correct spots on the combined dataframe
-
-    df.insert(0,'Seq',seq)
-    df.insert(1,'Group',Group)
-    df.insert(2,'Rep',Repit)
-
-
-    df2.insert(0,'Seq',seq2)
-    df2.insert(1,'Group',Group3)
-    df2.insert(2,'Rep',Repit3)
-
-
-    name2 = name.replace('.csv','-Degradation-Data.csv')
-    name3 = name.replace('.csv','-Degradation-Statistics.csv')
-    name4 = name.replace('.csv','-Magnet-Statistics.csv')
-    name5 = name.replace('.csv','-Magnet-Data.csv')
-
-#Insert Group and Rep within the statistics dataframe mean with correct length
-    Group2 = [Number] * 2
-    Repit2 = [Rep] * 2
-    mean = mean.T
-    mean2 = mean2.T
-    mean.insert(0,'Group',Group2)
-    mean.insert(1,'Rep',Repit2)
-    mean2.insert(0,'Group',Group2)
-    mean2.insert(1,'Rep',Repit2)
-
-#Creates new folder for the combined csv or moves to that directory if it already exists
-
-    path = os.getcwd()
-    directory = os.path.join(path,r'Degradation Data')
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-
-
-#Changes directory to put it into the new folder
-    os.chdir(directory)
-
-#Writes to csv in new folder
-    df.to_csv(name2,index=False)
-    df2.to_csv(name5,index=False)
-    mean.to_csv(name3,index=True)
-    mean2.to_csv(name4,index=True)
-'''
 
 path = os.getcwd()
 directory = os.path.join(path,r'Degradation Data')
@@ -235,7 +131,9 @@ if not os.path.exists(directory):
 
 #Changes directory to put it into the new folder
 os.chdir(directory)
-    
-Comp_Data = pd.concat([df,df2],ignore_index=True)
-Comp_Data.to_csv('PX4-075-Data.csv',index=False)
-Aves.to_csv('Statistics.csv',index=True)
+
+Comb_Data = pd.ExcelWriter('PX4-075-Data.xlsx', engine='xlsxwriter')
+df.to_excel(Comb_Data,sheet_name='Accel&Gyro',index=False)
+df2.to_excel(Comb_Data,sheet_name='Magnetometer',index=False)
+Aves.to_excel(Comb_Data,sheet_name='Mean&Stdev')
+Comb_Data.save()    
