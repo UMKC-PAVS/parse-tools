@@ -45,12 +45,12 @@ else:
 os.chdir(path)
 
 # list of new headers
-new_headers = ['micro_seconds','Att.roll','Att.pitch','Att.yaw','Accel.x','Accel.y',
+new_headers = ['micro_seconds','Channels_in.0','Channels_in.1','Channels_in.2','Channels_in.3','Channels_in.4','Channels_in.5','Voltage','Att.roll','Att.pitch','Att.yaw','Accel.x','Accel.y',
                'Accel.z','Gyro.x','Gyro.y','Gyro.z','Mag.x','Mag.y','Mag.z',
                'GPS.lat','GPS.lon','GPS.alt','GPS.hdop','GPS.vdop']
 
 # list that contains every column we want to keep
-needed_headers = ['microseconds_since_start','roll_mpu_mahony',
+needed_headers = ['microseconds_since_start','rc0_scaled','rc1_scaled','rc2_scaled','rc3_scaled','rc4_scaled','rc5_scaled','adc_array2','roll_mpu_mahony',
                   'pitch_mpu_mahony','yaw_mpu_mahony','a_mpu[0]','a_mpu[1]',
                   'a_mpu[2]','g_mpu[0]','g_mpu[1]','g_mpu[2]','m_mpu[0]',
                   'm_mpu[1]','m_mpu[2]','lat','lng','alt_ellipsoid',
