@@ -6,33 +6,21 @@ Date:           9/16/2019
 Purpose:        Modified from simple example and converted to create and save
                 plots automatically inside of automated parser
 Notes:          Modified original file to accept filename from auto parser,
-                most of the rest of the script is unchanged.
-                
-Changelog:
-9/20/2019   Simeon Karnes
-            Added "try-except" conditions around the Nav State and Trigger
-            Plots. The RPY plotter y-axis label is now "Degrees" and the
-            quat2eul conversion works with it.
-9/24/2019   Simeon Karnes
-            Added plotting CPU and RAM usage, then I organized every individual
-            plotting into try/except blocks.
-09/26/2019  Shawn Herrington
-            Updated some plots to account for the newly renamed resampled csv
-            Column names now contain constituent csv file name as well to
-            prevent overwriting of duplicates.  Some fixes have been applied
-            here but not all.  Further work needs to be done to fix other plots
-            and/or clean up the way this was done (it's kind of sloppy)
-09/27/2019  Paul Klappa
-            Updated df column call for cpu load and ram
-            The make_plots code will now create load and ram plots
-            Added loc='best' for legend parameter to place legend box in 'best'
-            location to avoid overlaying on top of data lines
+                most of the rest of the script is unchanged
+Change Log:     Thomas Cacy
+Date:           07/08/2020
+                changed so it works with unified parsing script's new headers
+                and removed convertions that happen in the combine_and_resample
+                script. Removed gragh of trigger. Moved the creation of the 
+                'Plots' directory to this program. Added var names for paths
+                so the same calculation is not preformed many times. Program 
+                will not figure out what plots are missing and only save those
+                it needs
 """
 
 import pandas as pd
 import os
 from matplotlib import pyplot as plt
-import quat2eul
 #from tkinter.filedialog import askopenfilename
 # get filename from the dialogue
 #filename = askopenfilename(title='Select file',filetypes=[('csv files','*.csv')])
@@ -41,221 +29,373 @@ def make_plots(filename_in):
        
     filename = os.path.join(os.getcwd(),filename_in)
     
-    print('Creating and saving plots from this filename:')
+    print('Creating and saving plots from:')
     
     print(filename_in)
-
-    # read in the data to a var called df (dataframe)
-    df = pd.read_csv(filename, index_col=0, header=0)
-    df['time_seconds'] = df.index/(10.0**6)
     
     just_the_pathname, just_the_filename = os.path.split(filename)
     #illumination = int(input('Time of illumination (s):     '))
     
+    plot_r_p_y = True
+    plot_accel = True
+    plot_gyro = True
+    plot_nav = True
+    plot_mag = True
+    plot_batt = True
+    plot_baro = True
+    plot_GPS = True
+    plot_alt_vdop_hdop = True
+    plot_mode = True
+    plot_rc = True
     
-#Graph R/P/Y
-    try:
-        csv_file_prefix = 'vehicle_attitude_0'
+    # directory that contains Plots directory
+    path_to_Plots = os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots')
+    
+    # path to the file
+    dir_Plots = path_to_Plots+'/'+just_the_filename[:-4]
+    
+    # plot file location
+    r_p_y_path = dir_Plots+'_R_P_Y_State.png'
+    accel_path = dir_Plots+'_Accelerometer.png'
+    gyro_path = dir_Plots+'_Gyroscope.png'
+    nav_path = dir_Plots+'_NavState.png'
+    mag_path = dir_Plots+'_Magnetometer.png'
+    batt_path = dir_Plots+'_Battery_voltage.png'
+    baro_path = dir_Plots+'_BaroAlt.png'
+    GPS_path = dir_Plots+'_GSP_lat_lon.png'
+    alt_vdop_hdop_path = dir_Plots+'_GPS_alt_vdop_hdop.png'
+    mode_path = dir_Plots+'_Mode.png'
+    rc_path = dir_Plots+'_RC.png'
+    
+    # make a directory to save the plots if one does not exist and determine 
+    # what needs to be plotted
+    if(not(os.path.isdir(path_to_Plots))):
+        os.mkdir(path_to_Plots)
+    if os.path.isfile(r_p_y_path):
+        plot_r_p_y = False
+    if os.path.isfile(accel_path):
+        plot_accel = False
+    if os.path.isfile(gyro_path):
+        plot_gyro = False
+    if os.path.isfile(nav_path):
+        plot_nav = False
+    if os.path.isfile(mag_path):
+        plot_gyro = False
+    if os.path.isfile(batt_path):
+        plot_nav = False
+    if os.path.isfile(baro_path):
+        plot_gyro = False
+    if os.path.isfile(GPS_path):
+        plot_nav = False
+    if os.path.isfile(alt_vdop_hdop_path):
+        plot_gyro = False
+    if os.path.isfile(mode_path):
+        plot_nav = False
+    if os.path.isfile(rc_path):
+        plot_gyro = False
+    
+    # read in the data to a var called df (dataframe)
+    df = pd.read_csv(filename, index_col=0, header=0)
+    df['time_seconds'] = df.index
+    
+    # check if the r p y plot exists
+    if plot_r_p_y:
         
-        plt.figure()
+        # try block to handle not finding the right data
+        try:
+
+            #Create a new figure to graph r p y
+            plt.figure()
+            plt.plot(df['time_seconds'],df["Att.roll"])
+            plt.plot(df['time_seconds'],df["Att.pitch"])
+            plt.plot(df['time_seconds'],df["Att.yaw"])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('R/P/Y')
+            plt.xlabel('Time, s')
+            plt.ylabel('Radians per Sec')
+            plt.legend(['Roll','Pitch','Yaw'])
+            
+            plt.savefig(r_p_y_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Roll Pitch Yaw')
         
-#        print(csv_file_prefix+'_'+'q[0]')
+        # print report
+        except: print('Roll Pitch Yaw data not found')
         
-        # make euler angles from quaternions
-        r,p,y = quat2eul.quat2eul(df[csv_file_prefix+'_'+'q[0]'],df[csv_file_prefix+'_'+'q[1]'],df[csv_file_prefix+'_'+'q[2]'],df[csv_file_prefix+'_'+'q[3]'])
+    else: 
+        print('Roll Pitch Yaw plot already exists for: '+just_the_filename[:-4])
+    
+    # check if the accel plot exists
+    if plot_accel:
         
-        plt.plot(df['time_seconds'],r)
-        plt.plot(df['time_seconds'],p)
-        plt.plot(df['time_seconds'],y)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('R/P/Y')
-        plt.xlabel('Time, s')
-        plt.ylabel('Degrees')
-        plt.legend(['Roll','Pitch','Yaw'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_'+csv_file_prefix + '_R_P_Y_State.png'),dpi=600,bbox_inche='tight')
-        print('Roll, pitch, and yaw DONE.')
-    except:
-        print('No roll, pitch, and yaw.')
+        # try block to handle not finding the right data
+        try:
+            
+            #Graph Accelerometer
+            plt.figure()
+            plt.plot(df['time_seconds'],df['Accel.x'])
+            plt.plot(df['time_seconds'],df['Accel.y'])
+            plt.plot(df['time_seconds'],df['Accel.z'])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('Accelerometer')
+            plt.xlabel('Time, s')
+            plt.ylabel('m/s^2')
+            plt.legend(['x-axis','y-axis','z-axis'])
+            plt.savefig(accel_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Accelerometer')
+        
+        # print report
+        except: print('Accelerometer data not found')
+        
+    else: 
+        print('Accelerometer plot already exists for: '+just_the_filename[:-4])
+        
+    # check if gyro plot exist
+    if plot_gyro:
+        
+        # try block to handle not finding the right data
+        try:
+            
+            #Graph Gyroscope
+            plt.figure()
+            plt.plot(df['time_seconds'],df['Gyro.x'])
+            plt.plot(df['time_seconds'],df['Gyro.y'])
+            plt.plot(df['time_seconds'],df['Gyro.z'])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('Gyroscope')
+            plt.xlabel('Time, s')
+            plt.ylabel('Radians')
+            plt.legend(['x-axis','y-axis','z-axis'])
+            plt.savefig(gyro_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Gyroscope')
+            
+        except: print('Gyroscope data not found')
+    
+    # print report        
+    else: 
+        print('Gyro plot already exists for: '+just_the_filename[:-4])
+        
+    # check if nave plot exist
+    if plot_nav:
+        
+        # try block to handle not finding the right data
+        try:
+            
+            #Graph Nav State
+            plt.figure()
+            plt.plot(df['time_seconds'],df['Nav State'])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('Nav State')
+            plt.xlabel('Time, s')
+            plt.ylabel('Value')
+            plt.legend(['Navigational State'])
+            plt.savefig(nav_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Nav State')
+        
+        # print report
+        except: print('Nav State data not found')
+    
+    else: 
+        print('Navigational State plot already exists for: '+just_the_filename[:-4])
+        
+    # check if the mag plot exists
+    if plot_mag:
+        
+        # try block to handle not finding the right data
+        try:
+
+            #Create a new figure to graph mag
+            plt.figure()
+            plt.plot(df['time_seconds'],df["Mag.x"])
+            plt.plot(df['time_seconds'],df["Mag.y"])
+            plt.plot(df['time_seconds'],df["Mag.z"])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('Mag')
+            plt.xlabel('Time, s')
+            plt.ylabel('Gauss')
+            plt.legend(['X','Y','Z'])
+            
+            plt.savefig(mag_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Mag')
+        
+        # print report
+        except: print('Mag data not found')
+        
+    else: 
+        print('Magnetometer plot already exists for: '+just_the_filename[:-4])
+        
+    # check if the batt plot exists
+    if plot_batt:
+        
+        # try block to handle not finding the right data
+        try:
+
+            #Create a new figure to graph batt
+            plt.figure()
+            plt.plot(df['time_seconds'],df["Voltage"])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('Battery_Voltage')
+            plt.xlabel('Time, s')
+            plt.ylabel('Volts')
+            plt.legend(['Battery_Voltage'])
+            
+            plt.savefig(batt_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Battery Voltage')
+        
+        # print report
+        except: print('Voltage data not found')
+        
+    else: 
+        print('Battery Voltage plot already exists for: '+just_the_filename[:-4])
+    
+    # check if the baro plot exists
+    if plot_baro:
+        
+        # try block to handle not finding the right data
+        try:
+
+            #Create a new figure to graph baro
+            plt.figure()
+            plt.plot(df['time_seconds'],df["BaroAlt"])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('BaroAlt')
+            plt.xlabel('Time, s')
+            plt.ylabel('Meters')
+            plt.legend(['BaroAlt'])
+            
+            plt.savefig(baro_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Barometer')
+        
+        # print report
+        except: print('Baro Alt data not found')
+        
+    else: 
+        print('Baro Alt plot already exists for: '+just_the_filename[:-4])
+    
+    # check if the GPS plot exists
+    if plot_GPS:
+        
+        # try block to handle not finding the right data
+        try:
+
+            #Create a new figure to graph gps
+            plt.figure()
+            plt.plot(df['GPS.lat'],df["GPS.lon"])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('GPS')
+            plt.xlabel('Latitude')
+            plt.ylabel('Longitude')
+            plt.legend(['Position'])
+            
+            plt.savefig(GPS_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot GPS Lat and Lon')
+        
+        # print report
+        except: print('Lat Lon data not found')
+        
+    else: 
+        print('Lat Lon plot already exists for: '+just_the_filename[:-4])
+    
+    # check if the alt vdop and hdop plot exists
+    if plot_alt_vdop_hdop:
+        
+        # try block to handle not finding the right data
+        try:
+
+            #Create a new figure to graph alt vdop and hdop
+            plt.figure()
+            plt.plot(df['time_seconds'],df["GPS.alt"])
+            plt.plot(df['time_seconds'],df["GPS.vdop"])
+            plt.plot(df['time_seconds'],df["GPS.hdop"])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('Alt/vdop/hdop')
+            plt.xlabel('Time, s')
+            plt.ylabel('Meters')
+            plt.legend(['Alt','Vdop','Hdop'])
+            
+            plt.savefig(alt_vdop_hdop_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Alt Vdop Hdop')
+        
+        # print report
+        except: print('Alt Vdop Hdop data not found')
+        
+    else: 
+        print('Alt Vdop Hdop plot already exists for: '+just_the_filename[:-4])
+    
+    # check if the mode plot exists
+    if plot_mode:
+        
+        # try block to handle not finding the right data
+        try:
+
+            #Create a new figure to graph alt vdop and hdop
+            plt.figure()
+            plt.plot(df['time_seconds'],df["Mode"])
+            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            plt.title('Flight Mode')
+            plt.xlabel('Time, s')
+            plt.ylabel('Mode')
+            plt.legend(['Mode'])
+            
+            plt.savefig(mode_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Mode')
+        
+        # print report
+        except: print('Flight Mode data not found')
+        
+    else: 
+        print('Mode plot already exists for: '+just_the_filename[:-4])
+    
+    # check if the rc exists
+    if plot_rc:
+        
+        # try block to handle not finding the right data
+        try:
+
+            #Create a new figure to graph alt vdop and hdop
+            plt.figure()
+            plt.plot(df['time_seconds'],df["Channels_in.0"])
+            plt.plot(df['time_seconds'],df["Channels_in.1"])
+            plt.plot(df['time_seconds'],df["Channels_in.2"])
+            plt.plot(df['time_seconds'],df["Channels_in.3"])
+            plt.plot(df['time_seconds'],df["Channels_in.4"])
+            plt.plot(df['time_seconds'],df["Channels_in.5"])
+            
+            # error handling in case there is no signal strength
+            try:
+                plt.plot(df['time_seconds'],df["RC.Signalstrength"])
+                #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            except: 
+                print('No RC Signal Strenght data')
+            try:
+                plt.plot(df['time_seconds'],df["RC.Failsafe"])
+            except: 
+                print('No RC Failsafe Data')
+                
+            plt.title('RC in')
+            plt.xlabel('Time, s')
+            plt.ylabel('')
+            plt.legend(['Channel 0','Channel 1','Channel 2','Channel 3','Channel 4','Channel 5','Signal Strength','Failsafe'])
+            
+            plt.savefig(rc_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot RC')
+        
+        # print report
+        except: print('RC data not found')
+        
+    else: 
+        print('RC plot already exists for: '+just_the_filename[:-4])
 
     
-#Graph Accelerometer
-    try:
-        csv_file_prefix = 'sensor_combined_0'        
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'accelerometer_m_s2[0]'])
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'accelerometer_m_s2[1]'])
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'accelerometer_m_s2[2]'])
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('Accelerometer')
-        plt.xlabel('Time, s')
-        plt.ylabel('m/s^2')
-        plt.legend(['x-axis','y-axis','z-axis'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_' + csv_file_prefix + '_Accelerometer.png'),dpi=600,bbox_inche='tight')
-        print('Accelerometer DONE.')
-    except:
-        print('No accelerometer.')
-   
-#Graph Gyroscope    
-    try:
-        csv_file_prefix = 'sensor_combined_0' 
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'gyro_rad[0]'],linewidth=1)
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'gyro_rad[1]'],linewidth=1)
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'gyro_rad[2]'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('Gyroscope')
-        plt.xlabel('Time, s')
-        plt.ylabel('Rad/s')
-        plt.legend(['x-axis','y-axis','z-axis'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_' + csv_file_prefix + '_Gyroscope.png'),dpi=600,bbox_inche='tight')
-        print('Gyroscope DONE.')   
-    except:
-        print('No gyroscope.')
-
-#Graph Voltage    
-    try:
-        csv_file_prefix = 'system_power_0' 
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'voltage5v_v'],linewidth=1)
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'voltage3v3_v'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('Power Module Voltage')
-        plt.xlabel('Time, s')
-        plt.ylabel('Volt')
-        plt.legend(['5V','3V'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_' + csv_file_prefix + '_PMUVoltage.png'),dpi=600,bbox_inche='tight')
-        print('Power DONE.')   
-    except:
-        print('No power.')
- 
-#Graph Current    
-    try:
-        csv_file_prefix = 'battery_status_0' 
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'current_a'],linewidth=1)
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'current_filtered_a'],linewidth=1)
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'average_current_a'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('Battery Current')
-        plt.xlabel('Time, s')
-        plt.ylabel('Amp')
-        plt.legend(['current','filtered','average'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_' + csv_file_prefix + '_BatteryCurrent.png'),dpi=600,bbox_inche='tight')
-        print('Battery Current DONE.')   
-    except:
-        print('No battery current.')
-        
-#Graph Other Voltage
-    try:
-        csv_file_prefix = 'battery_status_0' 
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'voltage_v'],linewidth=1)
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'voltage_filtered_v'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('Battery Voltage')
-        plt.xlabel('Time, s')
-        plt.ylabel('Amp')
-        plt.legend(['voltage','filtered'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_' + csv_file_prefix + '_BatteryVoltage.png'),dpi=600,bbox_inche='tight')
-        print('Battery Voltage DONE.')   
-    except:
-        print('No battery voltage.')
-
-#Graph Mag    
-    try:
-        csv_file_prefix = 'vehicle_magnetometer_0' 
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'magnetometer_ga[0]'],linewidth=1)
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'magnetometer_ga[1]'],linewidth=1)
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'magnetometer_ga[2]'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('Magnetometer')
-        plt.xlabel('Time, s')
-        plt.ylabel('Gauss')
-        plt.legend(['x-axis','y-axis','z-axis'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_' + csv_file_prefix + '_Magnetometer.png'),dpi=600,bbox_inche='tight')
-        print('Magentometer DONE.')   
-    except:
-        print('No magnetometer.')
-        
-#Graph Nav State
-    try:
-        csv_file_prefix = 'vehicle_status_0'
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'nav_state'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('Nav State')
-        plt.xlabel('Time, s')
-        plt.ylabel('Value')
-        plt.legend(['Navigational State'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_' + csv_file_prefix + '_NavState.png'),dpi=600,bbox_inche='tight')
-        print('Nav state DONE.')
-    except:
-        print('No nav state.')
-
-              
-#Graph Trigger
-        #Using the new trigger method, mode swith should form a square pulse
-        #about 3s prior
-    try:
-        csv_file_prefix = 'input_rc_0'
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'values[5]'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('RC Channel 5 (trigger)')
-        plt.xlabel('Time, s')
-        plt.ylabel('Value')
-        plt.legend(['Channel 5'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_' + csv_file_prefix + '_RC.png'),dpi=600,bbox_inche='tight')
-        print('RC DONE.')
-    except:
-        print('No RC.')
-    
-#RAM Usage  
-    try:
-        csv_file_prefix = 'cpuload_0'
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'ram_usage'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('Ram Usage')
-        plt.xlabel('Time, s')
-        plt.ylabel('Ram Usage')
-        plt.ylim(0,1)
-        plt.legend(['Ram'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4]+'_RAM_Usage.png'),dpi=600,bbox_inche='tight')
-        print('RAM usage DONE.')
-    except:
-        print('No RAM.')
-
-#CPU Load
-    try:
-        csv_file_prefix = 'cpuload_0'
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'load'],linewidth=1)
-        #plt.axvline(x=illumination, linewidth=0.5, color='red')
-        plt.title('CPU Load')
-        plt.xlabel('Time, s')
-        plt.ylabel('Load')
-        plt.ylim(0,1)
-        plt.legend(['Load'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4]+'_CPU_Load.png'),dpi=600,bbox_inche='tight')
-        print('CPU load DONE.')
-    except:
-        print('No CPU load.')
-        
-#Graph Number of Satellites
-    try:
-        csv_file_prefix = 'vehicle_gps_position_0'
-        plt.figure()
-        plt.plot(df['time_seconds'],df[csv_file_prefix+'_'+'satellites_used'],linewidth=1)
-        plt.title('GPS Number of Satellites')
-        plt.xlabel('Time, s')
-        plt.ylabel('Value')
-        plt.legend(['Satellites'],loc='best')
-        plt.savefig(os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots',just_the_filename[:-4] + '_Satellites.png'),dpi=600,bbox_inche='tight')
-        print('GPS Satellites DONE.')   
-    except:
-        print('No satellites.')
-        
+     
     plt.close('all')
-    
