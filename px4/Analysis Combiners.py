@@ -12,25 +12,30 @@ Not ready for running
 """
 
 import os
-import shutil
 import pandas as pd
 
 #Overarching folder that holds subfolders with combined files
-src_dir = r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\075'
+src_dir = r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\037'
+#src_dir= r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\complete'
 #Directory for degradation files
 dst_dir= r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\complete'
+
+os.chdir(src_dir)
 
 files_list = []
 for root, dirs, files in os.walk(src_dir):
     for f in files:
-        if f.endswith('Data.csv'):
-            df3 = pd.read_csv(files,index_col=None, header=0)
-            files_list.append(df3)            
+        if f.startswith('PX4-037'):
+            if f.endswith('.csv'):
+                df3 = pd.read_csv(f)
+                files_list.append(df3)            
         #if f.endswith('Statistics.csv'):
          #   shutil.copy(os.path.join(root,f), dst_dir)
          
 frame = pd.concat(files_list)
 
-frame = frame.drop(['Unnamed: 0'],axis=1)
+#frame = frame.drop(['Unnamed: 0'],axis=1)
 
-frame.to_csv('PX4-075.csv')
+os.chdir(dst_dir)
+
+frame.to_csv('PX4-037-One-Sheet.csv')
