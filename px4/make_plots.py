@@ -39,14 +39,15 @@ def make_plots(filename_in):
     plot_r_p_y = True
     plot_accel = True
     plot_gyro = True
-    plot_nav = True
     plot_mag = True
     plot_batt = True
     plot_baro = True
     plot_GPS = True
-    plot_alt_vdop_hdop = True
+    plot_alt = True
+    plot_vdop_hdop = True
     plot_mode = True
     plot_rc = True
+    plot_channels = True
     
     # directory that contains Plots directory
     path_to_Plots = os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots')
@@ -58,13 +59,14 @@ def make_plots(filename_in):
     r_p_y_path = dir_Plots+'_R_P_Y_State.png'
     accel_path = dir_Plots+'_Accelerometer.png'
     gyro_path = dir_Plots+'_Gyroscope.png'
-    nav_path = dir_Plots+'_NavState.png'
     mag_path = dir_Plots+'_Magnetometer.png'
     batt_path = dir_Plots+'_Battery_voltage.png'
     baro_path = dir_Plots+'_BaroAlt.png'
     GPS_path = dir_Plots+'_GSP_lat_lon.png'
-    alt_vdop_hdop_path = dir_Plots+'_GPS_alt_vdop_hdop.png'
+    alt_path = dir_Plots+'_GPS_alt.png'
+    vdop_hdop_path = dir_Plots+'_vdop_hdop.png'
     mode_path = dir_Plots+'_Mode.png'
+    channels_path = dir_Plots+'_Channels.png'
     rc_path = dir_Plots+'_RC.png'
     
     # make a directory to save the plots if one does not exist and determine 
@@ -77,22 +79,22 @@ def make_plots(filename_in):
         plot_accel = False
     if os.path.isfile(gyro_path):
         plot_gyro = False
-    if os.path.isfile(nav_path):
-        plot_nav = False
     if os.path.isfile(mag_path):
-        plot_gyro = False
+        plot_mag = False
     if os.path.isfile(batt_path):
-        plot_nav = False
+        plot_batt = False
     if os.path.isfile(baro_path):
         plot_gyro = False
     if os.path.isfile(GPS_path):
-        plot_nav = False
-    if os.path.isfile(alt_vdop_hdop_path):
-        plot_gyro = False
-    if os.path.isfile(mode_path):
-        plot_nav = False
+        plot_GPS = False
+    if os.path.isfile(alt_path):
+        plot_alt = False
+    if os.path.isfile(vdop_hdop_path):
+        plot_vdop_hdop = False
     if os.path.isfile(rc_path):
-        plot_gyro = False
+        plot_rc = False
+    if os.path.isfile(channels_path):
+        plot_channels = False
     
     # read in the data to a var called df (dataframe)
     df = pd.read_csv(filename, index_col=0, header=0)
@@ -176,31 +178,7 @@ def make_plots(filename_in):
     # print report        
     else: 
         print('Gyro plot already exists for: '+just_the_filename[:-4])
-        
-    # check if nave plot exist
-    if plot_nav:
-        
-        # try block to handle not finding the right data
-        try:
             
-            #Graph Nav State
-            plt.figure()
-            plt.plot(df['time_seconds'],df['Nav State'])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
-            plt.title('Nav State')
-            plt.xlabel('Time, s')
-            plt.ylabel('Value')
-            plt.legend(['Navigational State'])
-            plt.savefig(nav_path,dpi=600,bbox_inche='tight')
-            
-            print('Plot Nav State')
-        
-        # print report
-        except: print('Nav State data not found')
-    
-    else: 
-        print('Navigational State plot already exists for: '+just_the_filename[:-4])
-        
     # check if the mag plot exists
     if plot_mag:
         
@@ -266,7 +244,6 @@ def make_plots(filename_in):
             plt.title('BaroAlt')
             plt.xlabel('Time, s')
             plt.ylabel('Meters')
-            plt.legend(['BaroAlt'])
             
             plt.savefig(baro_path,dpi=600,bbox_inche='tight')
             
@@ -291,7 +268,6 @@ def make_plots(filename_in):
             plt.title('GPS')
             plt.xlabel('Latitude')
             plt.ylabel('Longitude')
-            plt.legend(['Position'])
             
             plt.savefig(GPS_path,dpi=600,bbox_inche='tight')
             
@@ -304,46 +280,70 @@ def make_plots(filename_in):
         print('Lat Lon plot already exists for: '+just_the_filename[:-4])
     
     # check if the alt vdop and hdop plot exists
-    if plot_alt_vdop_hdop:
+    if plot_alt:
         
         # try block to handle not finding the right data
         try:
 
-            #Create a new figure to graph alt vdop and hdop
+            #Create a new figure to graph alt
             plt.figure()
             plt.plot(df['time_seconds'],df["GPS.alt"])
-            plt.plot(df['time_seconds'],df["GPS.vdop"])
-            plt.plot(df['time_seconds'],df["GPS.hdop"])
             #plt.axvline(x=illumination, linewidth=0.5, color='red')
-            plt.title('Alt/vdop/hdop')
+            plt.title('Alt')
             plt.xlabel('Time, s')
             plt.ylabel('Meters')
-            plt.legend(['Alt','Vdop','Hdop'])
             
-            plt.savefig(alt_vdop_hdop_path,dpi=600,bbox_inche='tight')
+            plt.savefig(alt_path,dpi=600,bbox_inche='tight')
             
-            print('Plot Alt Vdop Hdop')
+            print('Plot GPS Alt')
         
         # print report
-        except: print('Alt Vdop Hdop data not found')
+        except: print('Alt Vdop')
         
     else: 
-        print('Alt Vdop Hdop plot already exists for: '+just_the_filename[:-4])
+        print('Alt plot already exists for: '+just_the_filename[:-4])
     
+    # check if the vdop and hdop
+    if plot_vdop_hdop:
+        
+        # try block to handle not finding the right data
+        try:
+            
+            # Create a new figure to gragh vdop and hdop
+            plt.figure()
+            plt.plot(df['time_seconds'],df['GPS.vdop'])
+            plt.plot(df['time_seconds'],df['GPS.hdop'])
+            plt.title('VDOP and HDOP')
+            plt.xlabel('Time, s')
+            plt.ylabel('')
+            plt.legend(['VDOP','HDOP'])
+            
+            plt.savefig(vdop_hdop_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot VDOP and HDOP')
+            
+        # print report
+        except: print('VDOP and HDOP date not found')
+            
+    else:
+        print('VDOP and HDOP plots alread exist for: '+just_the_filename[:-4])
+        
     # check if the mode plot exists
     if plot_mode:
         
         # try block to handle not finding the right data
         try:
 
-            #Create a new figure to graph alt vdop and hdop
+            #Create a new figure to graph Mode
             plt.figure()
             plt.plot(df['time_seconds'],df["Mode"])
             #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Flight Mode')
             plt.xlabel('Time, s')
             plt.ylabel('Mode')
-            plt.legend(['Mode'])
+            plt.text(2, .4, "0 = Manual\n1.1 = Stabilized\n1.2 = Altitude\n2.0 = Position\n4.0 = Mission",
+                    bbox=dict(boxstyle = "square",
+                  facecolor = "white"))
             
             plt.savefig(mode_path,dpi=600,bbox_inche='tight')
             
@@ -356,12 +356,12 @@ def make_plots(filename_in):
         print('Mode plot already exists for: '+just_the_filename[:-4])
     
     # check if the rc exists
-    if plot_rc:
+    if plot_channels:
         
         # try block to handle not finding the right data
         try:
 
-            #Create a new figure to graph alt vdop and hdop
+            #Create a new figure to graph channels
             plt.figure()
             plt.plot(df['time_seconds'],df["Channels_in.0"])
             plt.plot(df['time_seconds'],df["Channels_in.1"])
@@ -370,32 +370,47 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df["Channels_in.4"])
             plt.plot(df['time_seconds'],df["Channels_in.5"])
             
-            # error handling in case there is no signal strength
-            try:
-                plt.plot(df['time_seconds'],df["RC.Signalstrength"])
-                #plt.axvline(x=illumination, linewidth=0.5, color='red')
-            except: 
-                print('No RC Signal Strenght data')
-            try:
-                plt.plot(df['time_seconds'],df["RC.Failsafe"])
-            except: 
-                print('No RC Failsafe Data')
-                
+            
+            plt.title('RC channels')
+            plt.xlabel('Time, s')
+            plt.ylabel('')
+            plt.legend(['Channel 0','Channel 1','Channel 2','Channel 3','Channel 4','Channel 5'])
+            
+            plt.savefig(channels_path,dpi=600,bbox_inche='tight')
+            
+            print('Plot Channels')
+        
+        # print report
+        except: print('RC channels not found')
+        
+    else: 
+        print('Channels plot already exists for: '+just_the_filename[:-4])
+        
+    # check if the rc exist
+    if plot_rc:
+        
+        # try block to handle not finding the right data
+        try:
+            
+            # Create a new figure to gragh rc
+            plt.figure()
+            plt.plot(df['time_seconds'],df["RC.Signalstrength"])
+            plt.plot(df['time_seconds'],df["RC.Failsafe"])
+            
             plt.title('RC in')
             plt.xlabel('Time, s')
             plt.ylabel('')
-            plt.legend(['Channel 0','Channel 1','Channel 2','Channel 3','Channel 4','Channel 5','Signal Strength','Failsafe'])
+            plt.legend(['Signal Strength','Failsafe'])
             
-            plt.savefig(rc_path,dpi=600,bbox_inche='tight')
+            plt.savefig(rc_path,dpi=600,bbox_iche='tight')
             
             print('Plot RC')
         
         # print report
-        except: print('RC data not found')
-        
-    else: 
-        print('RC plot already exists for: '+just_the_filename[:-4])
-
-    
+        except: print('RC in data not found')
      
+    else:
+        print('RC plots already exist for: '+just_the_filename[:-4])
+        
+    # close all plots
     plt.close('all')

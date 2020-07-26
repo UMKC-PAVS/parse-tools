@@ -108,7 +108,7 @@ def combine_and_resample_px4_nogui(input_path,file_prefix=''):
     
     # create empty list so we can append to it
     list_of_df = []
-
+        
     #empty list so we can append it
     reject_column_list = []
     
@@ -118,13 +118,6 @@ def combine_and_resample_px4_nogui(input_path,file_prefix=''):
     # iterate through the csv in the current directory, create a df for each
     # filename, put the df into a list of other df
     for current_filename in list_of_filenames:
-
-        # switch the index of the big_df to proper time delta column
-        big_df.index = pd.to_datetime(big_df.time_properformat.astype('int64'))
-               
-        # create the resampled  df
-        resampled_df = big_df.asfreq(str(freq_arg)+freq_type,method='ffill')
-
         
         # this is the important read, read in the data we care about, the index
         # is stored in column 0, the header is stored in row 0, pandas will 
@@ -228,15 +221,7 @@ def combine_and_resample_px4_nogui(input_path,file_prefix=''):
     
     #call the quat2eul function to change the attitude to eul
     r,p,y = quat2eul(resampled_df['Att.Qx'],resampled_df['Att.Qy'],resampled_df['Att.Qz'],resampled_df['Att.Qw'])
-    '''
-    #call the obfuscate function to change gps coordinates to relative
-    lat,lon,alt = obfuscate(resampled_df['GPS.lat'],resampled_df['GPS.lon'],resampled_df['GPS.alt'])
-    
-    #change the values in the file
-    resampled_df['GPS.lat'] = lat
-    resampled_df['GPS.lon'] = lon
-    resampled_df['GPS.alt'] = alt
-    '''
+
     # add the pitch roll and yaw to the resampled_df
     resampled_df['Att.roll'] = r
     resampled_df['Att.pitch'] = p

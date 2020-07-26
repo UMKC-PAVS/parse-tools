@@ -45,7 +45,7 @@ def assign_names(keyword, new_headers):
     if (keyword == 'voltage_v'):
          new_headers.append('Voltage')
     if (keyword == 'rssi'):
-         new_headers.append('Signalstrength')
+         new_headers.append('RC.Signalstrength')
     if (keyword == 'values[0]'):
          new_headers.append('Channels_in.0')
     if (keyword == 'values[1]'):
