@@ -15,17 +15,19 @@ import os
 import pandas as pd
 
 #Overarching folder that holds subfolders with combined files
-src_dir = r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\037'
+src_dir = r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\075'
 #src_dir= r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\complete'
 #Directory for degradation files
 dst_dir= r'C:\Users\het9t\OneDrive\Documents\PX4 Summary Statistics Sheets\complete'
+
+name = 'PX4-075_3_05'
 
 os.chdir(src_dir)
 
 files_list = []
 for root, dirs, files in os.walk(src_dir):
     for f in files:
-        if f.startswith('PX4-037'):
+        if f.startswith(name):
             if f.endswith('.csv'):
                 df3 = pd.read_csv(f)
                 files_list.append(df3)            
@@ -38,4 +40,4 @@ frame = pd.concat(files_list)
 
 os.chdir(dst_dir)
 
-frame.to_csv('PX4-037-One-Sheet.csv')
+frame.to_csv(name + '-Data.csv')
