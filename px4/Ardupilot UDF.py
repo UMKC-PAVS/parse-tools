@@ -90,6 +90,8 @@ resampled_df = resampled_df.drop(columns=['SAcc','Rsn','ModeNum','Q1','Q2','Q3',
 
 resampled_df = resampled_df.rename(columns={"Health":"RCfailsafe",'C3':'C3:Throttle',"Lat":"GPS.Lat","Lng":"GPS.Lon","Alt":"GPS.Alt","GyrX" : "GyroX", "GyrY" : "GyroY", "GyrZ" : "GyroZ","AccZ": "AccelZ", "AccX":"AccelX","AccY":"AccelY"})
 
+#Flight Modes
+resampled_df.Mode = resampled_df.Mode.replace({5: 2.2, 7: 1.7, 20 : 3.5, 9 : 3.9, 6 : 3.8})
 
 #Normalize GPS signals 
 xx = resampled_df['GPS.Lat'].iloc[0]
