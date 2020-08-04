@@ -74,17 +74,18 @@ for current_file in files:
     
     #if statment to determine if we need to create dir
     if os.path.isdir(os.path.join(dir_name,'Flight Data')):
-        
-        # check if folder exists and create if needed
-        if not os.path.exists(os.path.join(dir_name,'Flight Data','combined')):
-            os.mkdir(os.path.join(dir_name,'Flight Data','combined'))
-            
-        # check if the directory has already been polupated meaning the 
-        # file has been processed
-        if not(len(os.listdir(os.path.join(dir_name,'Flight Data','combined'))) == 0):
-            process_file = False
+        pass
     else:
         os.mkdir(os.path.join(dir_name,'Flight Data'))
+        
+    # check if folder exists and create if needed
+    if not os.path.exists(os.path.join(dir_name,'Flight Data','combined')):
+        os.mkdir(os.path.join(dir_name,'Flight Data','combined'))
+         
+    # check if the directory has already been polupated meaning the 
+    # file has been processed
+    if not(len(os.listdir(os.path.join(dir_name,'Flight Data','combined'))) == 0):
+        process_file = False
     
     # if statement to determine id the file should be read
     if process_file == True:
@@ -126,15 +127,17 @@ for current_file in files:
         # change units from mvolts to volts
         df['Voltage'] = df['Voltage']/1000
         
+        # change time units from microseconds to seconds
+        df.index = df.index/10**6
         
         # replace failsafe and flight modes with numbers
         df["RC.Failsafe"] = df["RC.Failsafe"].replace({'Hover': 1, 'DisConnected': 2})
-        df["Mode"] = df["Mode"].replace({'GPS_Atti': 1.1, 'Sport': 1.3, 'Position-GPS' : 2 , 'Position-ATTI' : 2.5})
+        df["Mode"] = df["Mode"].replace({'Manual': 0.0, 'GPS_Atti': 1.1, 'Sport': 1.3, 'Position-GPS' : 2 , 'Atti' : 2.5})
     
         # save the file in the right directory 
         df.to_csv(path_or_buf=os.path.join(dir_name,'Flight Data','combined',dir_name+'_results.csv'),index=True, index_label='Time')
         
-    # print report on .DAT files
+    # print report on .csv files
     else: 
         print('Csv file has already been converted for '+dir_name)
         
