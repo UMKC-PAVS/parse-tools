@@ -117,7 +117,7 @@ def make_plots(filename_in):
             plt.ylabel('Radians per Sec')
             plt.legend(['Roll','Pitch','Yaw'])
             
-            plt.savefig(r_p_y_path,dpi=600,bbox_inche='tight')
+            plt.savefig(r_p_y_path,dpi=900,bbox_inche='tight')
             
             print('Plot Roll Pitch Yaw')
         
@@ -143,7 +143,7 @@ def make_plots(filename_in):
             plt.xlabel('Time, s')
             plt.ylabel('m/s^2')
             plt.legend(['x-axis','y-axis','z-axis'])
-            plt.savefig(accel_path,dpi=600,bbox_inche='tight')
+            plt.savefig(accel_path,dpi=900,bbox_inche='tight')
             
             print('Plot Accelerometer')
         
@@ -169,7 +169,7 @@ def make_plots(filename_in):
             plt.xlabel('Time, s')
             plt.ylabel('Radians')
             plt.legend(['x-axis','y-axis','z-axis'])
-            plt.savefig(gyro_path,dpi=600,bbox_inche='tight')
+            plt.savefig(gyro_path,dpi=900,bbox_inche='tight')
             
             print('Plot Gyroscope')
             
@@ -196,7 +196,7 @@ def make_plots(filename_in):
             plt.ylabel('Gauss')
             plt.legend(['X','Y','Z'])
             
-            plt.savefig(mag_path,dpi=600,bbox_inche='tight')
+            plt.savefig(mag_path,dpi=900,bbox_inche='tight')
             
             print('Plot Mag')
         
@@ -221,7 +221,7 @@ def make_plots(filename_in):
             plt.ylabel('Volts')
             plt.legend(['Battery_Voltage'])
             
-            plt.savefig(batt_path,dpi=600,bbox_inche='tight')
+            plt.savefig(batt_path,dpi=900,bbox_inche='tight')
             
             print('Plot Battery Voltage')
         
@@ -245,7 +245,7 @@ def make_plots(filename_in):
             plt.xlabel('Time, s')
             plt.ylabel('Meters')
             
-            plt.savefig(baro_path,dpi=600,bbox_inche='tight')
+            plt.savefig(baro_path,dpi=900,bbox_inche='tight')
             
             print('Plot Barometer')
         
@@ -269,7 +269,7 @@ def make_plots(filename_in):
             plt.xlabel('Latitude')
             plt.ylabel('Longitude')
             
-            plt.savefig(GPS_path,dpi=600,bbox_inche='tight')
+            plt.savefig(GPS_path,dpi=900,bbox_inche='tight')
             
             print('Plot GPS Lat and Lon')
         
@@ -293,7 +293,7 @@ def make_plots(filename_in):
             plt.xlabel('Time, s')
             plt.ylabel('Meters')
             
-            plt.savefig(alt_path,dpi=600,bbox_inche='tight')
+            plt.savefig(alt_path,dpi=900,bbox_inche='tight')
             
             print('Plot GPS Alt')
         
@@ -318,7 +318,7 @@ def make_plots(filename_in):
             plt.ylabel('')
             plt.legend(['VDOP','HDOP'])
             
-            plt.savefig(vdop_hdop_path,dpi=600,bbox_inche='tight')
+            plt.savefig(vdop_hdop_path,dpi=900,bbox_inche='tight')
             
             print('Plot VDOP and HDOP')
             
@@ -337,15 +337,11 @@ def make_plots(filename_in):
             #Create a new figure to graph Mode
             plt.figure()
             plt.plot(df['time_seconds'],df["Mode"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Flight Mode')
             plt.xlabel('Time, s')
             plt.ylabel('Mode')
-            plt.text(2, .4, "0 = Manual\n1.1 = Stabilized\n1.2 = Altitude\n2.0 = Position\n4.0 = Mission",
-                    bbox=dict(boxstyle = "square",
-                  facecolor = "white"))
-            
-            plt.savefig(mode_path,dpi=600,bbox_inche='tight')
+    
+            plt.savefig(mode_path,dpi=900,bbox_inche='tight')
             
             print('Plot Mode')
         
@@ -363,20 +359,19 @@ def make_plots(filename_in):
 
             #Create a new figure to graph channels
             plt.figure()
-            plt.plot(df['time_seconds'],df["Channels_in.0"])
-            plt.plot(df['time_seconds'],df["Channels_in.1"])
-            plt.plot(df['time_seconds'],df["Channels_in.2"])
-            plt.plot(df['time_seconds'],df["Channels_in.3"])
+            plt.plot(df['time_seconds'],df["RC.Roll"])
+            plt.plot(df['time_seconds'],df["RC.Pitch"])
+            plt.plot(df['time_seconds'],df["RC.Throttle"])
+            plt.plot(df['time_seconds'],df["RC.Yaw"])
             plt.plot(df['time_seconds'],df["Channels_in.4"])
             plt.plot(df['time_seconds'],df["Channels_in.5"])
             
-            
             plt.title('RC channels')
             plt.xlabel('Time, s')
-            plt.ylabel('')
-            plt.legend(['Channel 0','Channel 1','Channel 2','Channel 3','Channel 4','Channel 5'])
-            
-            plt.savefig(channels_path,dpi=600,bbox_inche='tight')
+            plt.ylabel('Channels')
+            plt.legend(['Roll','Pitch','Throttle','Yaw','Channel 4','Channel 5'])
+
+            plt.savefig(channels_path,dpi=900,bbox_inche='tight')
             
             print('Plot Channels')
         
@@ -399,10 +394,10 @@ def make_plots(filename_in):
             
             plt.title('RC in')
             plt.xlabel('Time, s')
-            plt.ylabel('')
+            plt.ylabel('RSSI')
             plt.legend(['Signal Strength','Failsafe'])
             
-            plt.savefig(rc_path,dpi=600,bbox_iche='tight')
+            plt.savefig(rc_path,dpi=900,bbox_iche='tight')
             
             print('Plot RC')
         

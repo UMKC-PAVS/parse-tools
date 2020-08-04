@@ -47,13 +47,13 @@ def assign_names(keyword, new_headers):
     if (keyword == 'rssi'):
          new_headers.append('RC.Signalstrength')
     if (keyword == 'values[0]'):
-         new_headers.append('Channels_in.0')
+         new_headers.append('RC.Roll')
     if (keyword == 'values[1]'):
-         new_headers.append('Channels_in.1')
+         new_headers.append('RC.Pitch')
     if (keyword == 'values[2]'):
-         new_headers.append('Channels_in.2')
+         new_headers.append('RC.Throttle')
     if (keyword == 'values[3]'):
-         new_headers.append('Channels_in.3')
+         new_headers.append('RC.Yaw')
     if (keyword == 'values[4]'):
          new_headers.append('Channels_in.4')
     if (keyword == 'values[5]'):

@@ -146,3 +146,5 @@ for current_file in files:
             print('An error occured: {0}'.format(err))
         
     print('Complete.')
+    
+print('All files processed')
