@@ -51,7 +51,7 @@ if len(files) == 0:
 columns_to_keep = ['IMU_ATTI(0):roll:C','IMU_ATTI(0):pitch:C','IMU_ATTI(0):yaw:C','IMU_ATTI(0):accelX','IMU_ATTI(0):accelY','IMU_ATTI(0):accelZ','IMU_ATTI(0):gyroX','IMU_ATTI(0):gyroY','IMU_ATTI(0):gyroZ','IMU_ATTI(0):magX','IMU_ATTI(0):magY','IMU_ATTI(0):magZ','GPS:Long','GPS:Lat','GPS:heightMSL','GPS:pDOP','GPS:hDOP','Controller:ctrl_pitch:D','Controller:ctrl_roll:D','Controller:ctrl_yaw:D','Controller:ctrl_thr:D','Controller:ctrl_mode','RC:failSafe','RC_Info:sigStrength:C','BatteryInfo:Vol:D']
 
 # list of column's new names   
-new_headers = ['Att.roll','Att.pitch','Att.yaw','Accel.x','Accel.y','Accel.z','Gyro.x','Gyro.y','Gyro.z','Mag.x','Mag.y','Mag.z','GPS.lon','GPS.lat','GPS.alt','GPS.vdop','GPS.hdop','RC.Pitch','RC.Roll','RC.Yaw','RC.Throttle','Mode','RC.Failsafe','SignalStrength','Voltage']
+new_headers = ['Att.roll','Att.pitch','Att.yaw','Accel.x','Accel.y','Accel.z','Gyro.x','Gyro.y','Gyro.z','Mag.x','Mag.y','Mag.z','GPS.lon','GPS.lat','GPS.alt','GPS.vdop','GPS.hdop','RC.Pitch','RC.Roll','RC.Yaw','RC.Throttle','Mode','RC.Failsafe','RC.Signalstrength','Voltage']
 
 # empty list to append later
 reject_columns_list = []
@@ -131,8 +131,8 @@ for current_file in files:
         df.index = df.index/10**6
         
         # replace failsafe and flight modes with numbers
-        df["RC.Failsafe"] = df["RC.Failsafe"].replace({'Hover': 1, 'DisConnected': 2})
-        df["Mode"] = df["Mode"].replace({'Manual': 0.0, 'GPS_Atti': 1.1, 'Sport': 1.3, 'Position-GPS' : 2 , 'Atti' : 2.5})
+        df["RC.Failsafe"] = df["RC.Failsafe"].replace({'Hover': 1, 'Landing': 2})
+        df["Mode"] = df["Mode"].replace({'Manual': 0.0, 'GPS_Atti': 1.1, 'Sport': 1.3, 'Position-GPS' : 2 , 'Atti' : 2.5,'AutoLanding': 3.8, 'FORCE_LANDING' : 3.9, 'ASST_TAKEOFF': 5, 'AssitedTakeoff' : 5, 'GoHome':6})
     
         # save the file in the right directory 
         df.to_csv(path_or_buf=os.path.join(dir_name,'Flight Data','combined',dir_name+'_results.csv'),index=True, index_label='Time')
