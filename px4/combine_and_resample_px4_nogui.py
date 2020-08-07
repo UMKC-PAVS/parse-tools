@@ -197,10 +197,10 @@ def combine_and_resample_px4_nogui(input_path,file_prefix=''):
     # modify time stamp since timestamp for px4 data is in microseconds, 'S' means
     # that this function is expected time formated ins seconds so the easiest way
     # to fix it is just to convert the number to seconds before passing it
-    big_df['time_properformat'] = pd.to_timedelta(big_df.index/10.0**6,'S')
+    big_df['time_properformat'] = pd.to_timedelta(big_df.index/10.0**6,'s')
     
     # switch the index of the big_df to proper time delta column
-    big_df.index = pd.to_datetime(big_df.time_properformat)
+    big_df.index = pd.to_datetime(big_df.time_properformat.astype('int64'))
     
     # fix this for 250Hz rate since the auto calculator is causing issues
     min_sampletime = .004
