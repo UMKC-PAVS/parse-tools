@@ -136,7 +136,7 @@ for current_file in files:
     # pass the progress report path to the combine_and_resample_px4_nogui() 
     # function if it does not already exist function, it will combine all csvs 
     # then stick them in a new directory
-    if os.path.isfile(dir_name+'/'+subdir_names[0]+'/'+dir_name+'_results.csv'):
+    if os.path.isfile(os.path.join(dir_name,subdir_names[0],'combined',dir_name+'_results.csv')):
         print('Resampling already completed for: '+ current_file)
     else:
         try:
@@ -146,3 +146,5 @@ for current_file in files:
             print('An error occured: {0}'.format(err))
         
     print('Complete.')
+    
+print('All files processed')

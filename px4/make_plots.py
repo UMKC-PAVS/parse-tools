@@ -84,7 +84,7 @@ def make_plots(filename_in):
     if os.path.isfile(batt_path):
         plot_batt = False
     if os.path.isfile(baro_path):
-        plot_gyro = False
+        plot_baro = False
     if os.path.isfile(GPS_path):
         plot_GPS = False
     if os.path.isfile(alt_path):
@@ -95,6 +95,8 @@ def make_plots(filename_in):
         plot_rc = False
     if os.path.isfile(channels_path):
         plot_channels = False
+    if os.path.isfile(mode_path):
+        plot_mode = False
     
     # read in the data to a var called df (dataframe)
     df = pd.read_csv(filename, index_col=0, header=0)
@@ -111,13 +113,12 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df["Att.roll"])
             plt.plot(df['time_seconds'],df["Att.pitch"])
             plt.plot(df['time_seconds'],df["Att.yaw"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('R/P/Y')
             plt.xlabel('Time, s')
             plt.ylabel('Radians per Sec')
             plt.legend(['Roll','Pitch','Yaw'])
             
-            plt.savefig(r_p_y_path,dpi=600,bbox_inche='tight')
+            plt.savefig(r_p_y_path,dpi=900,bbox_inche='tight')
             
             print('Plot Roll Pitch Yaw')
         
@@ -138,15 +139,14 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df['Accel.x'])
             plt.plot(df['time_seconds'],df['Accel.y'])
             plt.plot(df['time_seconds'],df['Accel.z'])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Accelerometer')
             plt.xlabel('Time, s')
             plt.ylabel('m/s^2')
             plt.legend(['x-axis','y-axis','z-axis'])
-            plt.savefig(accel_path,dpi=600,bbox_inche='tight')
+            plt.savefig(accel_path,dpi=900,bbox_inche='tight')
             
             print('Plot Accelerometer')
-        
+    
         # print report
         except: print('Accelerometer data not found')
         
@@ -164,12 +164,11 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df['Gyro.x'])
             plt.plot(df['time_seconds'],df['Gyro.y'])
             plt.plot(df['time_seconds'],df['Gyro.z'])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Gyroscope')
             plt.xlabel('Time, s')
             plt.ylabel('Radians')
             plt.legend(['x-axis','y-axis','z-axis'])
-            plt.savefig(gyro_path,dpi=600,bbox_inche='tight')
+            plt.savefig(gyro_path,dpi=900,bbox_inche='tight')
             
             print('Plot Gyroscope')
             
@@ -190,13 +189,12 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df["Mag.x"])
             plt.plot(df['time_seconds'],df["Mag.y"])
             plt.plot(df['time_seconds'],df["Mag.z"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Mag')
             plt.xlabel('Time, s')
             plt.ylabel('Gauss')
             plt.legend(['X','Y','Z'])
             
-            plt.savefig(mag_path,dpi=600,bbox_inche='tight')
+            plt.savefig(mag_path,dpi=900,bbox_inche='tight')
             
             print('Plot Mag')
         
@@ -215,13 +213,11 @@ def make_plots(filename_in):
             #Create a new figure to graph batt
             plt.figure()
             plt.plot(df['time_seconds'],df["Voltage"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Battery_Voltage')
             plt.xlabel('Time, s')
             plt.ylabel('Volts')
-            plt.legend(['Battery_Voltage'])
             
-            plt.savefig(batt_path,dpi=600,bbox_inche='tight')
+            plt.savefig(batt_path,dpi=900,bbox_inche='tight')
             
             print('Plot Battery Voltage')
         
@@ -240,12 +236,11 @@ def make_plots(filename_in):
             #Create a new figure to graph baro
             plt.figure()
             plt.plot(df['time_seconds'],df["BaroAlt"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('BaroAlt')
             plt.xlabel('Time, s')
             plt.ylabel('Meters')
             
-            plt.savefig(baro_path,dpi=600,bbox_inche='tight')
+            plt.savefig(baro_path,dpi=900,bbox_inche='tight')
             
             print('Plot Barometer')
         
@@ -260,19 +255,17 @@ def make_plots(filename_in):
         
         # try block to handle not finding the right data
         try:
-
-            #Create a new figure to graph gps
-            plt.figure()
-            plt.plot(df['GPS.lat'],df["GPS.lon"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+        
+            #Create a new figure to graph gps        
+            plt.figure()                    
+            plt.scatter(df['GPS.lat'],df["GPS.lon"])
             plt.title('GPS')
             plt.xlabel('Latitude')
             plt.ylabel('Longitude')
-            
-            plt.savefig(GPS_path,dpi=600,bbox_inche='tight')
+            plt.savefig(GPS_path,dpi=900,bbox_inche='tight')
             
             print('Plot GPS Lat and Lon')
-        
+    
         # print report
         except: print('Lat Lon data not found')
         
@@ -288,12 +281,11 @@ def make_plots(filename_in):
             #Create a new figure to graph alt
             plt.figure()
             plt.plot(df['time_seconds'],df["GPS.alt"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Alt')
             plt.xlabel('Time, s')
             plt.ylabel('Meters')
             
-            plt.savefig(alt_path,dpi=600,bbox_inche='tight')
+            plt.savefig(alt_path,dpi=900,bbox_inche='tight')
             
             print('Plot GPS Alt')
         
@@ -318,7 +310,7 @@ def make_plots(filename_in):
             plt.ylabel('')
             plt.legend(['VDOP','HDOP'])
             
-            plt.savefig(vdop_hdop_path,dpi=600,bbox_inche='tight')
+            plt.savefig(vdop_hdop_path,dpi=900,bbox_inche='tight')
             
             print('Plot VDOP and HDOP')
             
@@ -341,11 +333,8 @@ def make_plots(filename_in):
             plt.title('Flight Mode')
             plt.xlabel('Time, s')
             plt.ylabel('Mode')
-            plt.text(2, .4, "0 = Manual\n1.1 = Stabilized\n1.2 = Altitude\n2.0 = Position\n4.0 = Mission",
-                    bbox=dict(boxstyle = "square",
-                  facecolor = "white"))
             
-            plt.savefig(mode_path,dpi=600,bbox_inche='tight')
+            plt.savefig(mode_path,dpi=900,bbox_inche='tight')
             
             print('Plot Mode')
         
@@ -363,20 +352,16 @@ def make_plots(filename_in):
 
             #Create a new figure to graph channels
             plt.figure()
-            plt.plot(df['time_seconds'],df["Channels_in.0"])
-            plt.plot(df['time_seconds'],df["Channels_in.1"])
-            plt.plot(df['time_seconds'],df["Channels_in.2"])
-            plt.plot(df['time_seconds'],df["Channels_in.3"])
-            plt.plot(df['time_seconds'],df["Channels_in.4"])
-            plt.plot(df['time_seconds'],df["Channels_in.5"])
-            
-            
+            plt.plot(df['time_seconds'],df["RC.Roll"])
+            plt.plot(df['time_seconds'],df["RC.Pitch"])
+            plt.plot(df['time_seconds'],df["RC.Throttle"])
+            plt.plot(df['time_seconds'],df["RC.Yaw"])            
             plt.title('RC channels')
             plt.xlabel('Time, s')
-            plt.ylabel('')
-            plt.legend(['Channel 0','Channel 1','Channel 2','Channel 3','Channel 4','Channel 5'])
-            
-            plt.savefig(channels_path,dpi=600,bbox_inche='tight')
+            plt.ylabel('Channels')
+            plt.legend(['Roll','Pitch','Throttle','Yaw','Channel 4','Channel 5'])
+
+            plt.savefig(channels_path,dpi=900,bbox_inche='tight')
             
             print('Plot Channels')
         
@@ -396,13 +381,12 @@ def make_plots(filename_in):
             plt.figure()
             plt.plot(df['time_seconds'],df["RC.Signalstrength"])
             plt.plot(df['time_seconds'],df["RC.Failsafe"])
-            
             plt.title('RC in')
             plt.xlabel('Time, s')
-            plt.ylabel('')
+            plt.ylabel('RSSI')
             plt.legend(['Signal Strength','Failsafe'])
             
-            plt.savefig(rc_path,dpi=600,bbox_iche='tight')
+            plt.savefig(rc_path,dpi=900,bbox_iche='tight')
             
             print('Plot RC')
         

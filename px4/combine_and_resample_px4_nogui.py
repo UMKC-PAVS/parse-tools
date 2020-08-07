@@ -85,12 +85,9 @@ def combine_and_resample_px4_nogui(input_path,file_prefix=''):
                             ,'gyro_rad[2]','magnetometer_ga[0]',
                             'magnetometer_ga[1]','magnetometer_ga[2]',
                             'rc_failsafe','voltage_v','rssi','q[0]',
-                            'q[1]','q[2]','q[3]','baro_alt','nav_state',
+                            'q[1]','q[2]','q[3]','baro_alt',
                             'values[0]','values[1]','values[2]','values[3]',
-                            'values[4]','values[5]','values[6]','values[7]',
-                            'values[8]','values[9]','values[10]','values[11]',
-                            'values[12]','values[13]','values[14]','values[15]'
-                            ,'values[16]','values[17]','values[18]']
+                            'values[4]','values[5]']
     # save the current path to a variable so we can return to it later
     original_path = os.getcwd()
     
@@ -191,30 +188,35 @@ def combine_and_resample_px4_nogui(input_path,file_prefix=''):
     big_df = big_df[~big_df.index.duplicated()]
     
     # this one gets rid of duplicated output data, not sure this is required
+    # it is
     big_df = big_df.drop_duplicates()
+    
+    # change microseconds to seconds
+    big_df['time_properformat'] = big_df.index/10.0**6
     
     # create a time delta column with the proper format, note the use of 10**6 to 
     # modify time stamp since timestamp for px4 data is in microseconds, 'S' means
-    # that this function is expected time formated ins seconds so the easiest way
+    # that this function is expected time formated in seconds so the easiest way
     # to fix it is just to convert the number to seconds before passing it
-    big_df['time_properformat'] = pd.to_timedelta(big_df.index/10.0**6,'S')
+    #big_df['time_properformat'] = pd.to_timedelta(big_df.index/10.0**6,'S')
     
     # switch the index of the big_df to proper time delta column
-    big_df.index = pd.to_datetime(big_df.time_properformat)
+    # big_df.index = pd.to_datetime(big_df.time_properformat)
     
     # fix this for 250Hz rate since the auto calculator is causing issues
     min_sampletime = .004
-    freq_arg = int(min_sampletime*10**6)
-    freq_type = 'U'
+    #freq_arg = int(min_sampletime*10**6)
+    #freq_type = 'U'
+    
+    # change the index to the right column
+    big_df = big_df.set_index('time_properformat')
     
     # create the resampled  df
-    resampled_df = big_df.asfreq(str(freq_arg)+freq_type, method='ffill')
-    
-    # get rid of the annoying time index, switch back to delta time in seconds
-    resampled_df.index = resampled_df.index.values.astype(np.uint64)/1000000
+    #resampled_df = big_df.asfreq(str(freq_arg)+freq_type, method='ffill')
+    resampled_df = big_df
     
     # get rid of the unused column before we send it to csv
-    resampled_df = resampled_df.drop(columns=['time_properformat'])
+    #resampled_df = resampled_df.drop(columns=['time_properformat'])
 
     #assign the new headers to the columns
     resampled_df.columns = new_headers
@@ -229,6 +231,9 @@ def combine_and_resample_px4_nogui(input_path,file_prefix=''):
     
     #drop the columns with the quat data in them
     resampled_df = resampled_df.drop(columns = ['Att.Qx','Att.Qy','Att.Qz','Att.Qw'])
+    
+    # convert millimeters to meters
+    resampled_df['GPS.alt'] = resampled_df['GPS.alt']/1000
     
     # check if folder exists and create if needed, this avoid the script trying
     # to read it's own results.csv as one of the constituent files if we run
