@@ -36,6 +36,10 @@ Changelog:
             can tell which files have been processed and ignore them. Removed 
             unecassary copying and moving of large files. Moved the creation of
             directories to the program that uses them to be consistent
+08/13/2020  Put the call to make plots in this script so that it will create 
+            plots even if the file has be processed. Added message to tell when
+            to program has finished
+            
 '''
 
 # os library used for directory handing and traversing
@@ -44,6 +48,7 @@ import sys
 # this will be used for calling terminal command directly from python
 from subprocess import call
 from combine_and_resample_px4_nogui import combine_and_resample_px4_nogui
+from make_plots import make_plots
 from pandas import errors
 python_version = sys.version_info
 
@@ -81,7 +86,7 @@ if len(files) == 0:
 
 for current_file in files:
 
-    # set convert_ulogs to True so we can iterate through the directory this 
+    # set convert_ulogs and to True so we can iterate through the directory this 
     # will be changed to False if the files were already converted
     convert_ulogs = True
     
@@ -144,7 +149,10 @@ for current_file in files:
             
         except (IOError,errors.EmptyDataError) as err: 
             print('An error occured: {0}'.format(err))
-        
+     
+    # call the make_plot function and pass the location of the results file
+    make_plots(os.path.join(dir_name,subdir_names[0],'combined',dir_name+'_results.csv'))
+    
     print('Complete.')
     
 print('All files processed')

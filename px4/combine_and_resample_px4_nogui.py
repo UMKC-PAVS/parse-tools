@@ -63,10 +63,10 @@ found a method to extract the datetime index as an int and all is working now
 
 import os
 import pandas as pd
-import numpy as np
+#import numpy as np
 import sys
 from quat2eul import quat2eul
-from make_plots import make_plots
+#from make_plots import make_plots
 from assign_names import assign_names
 # from obfuscate_gps import obfuscate
 
@@ -249,7 +249,7 @@ def combine_and_resample_px4_nogui(input_path,file_prefix=''):
     print('Minimum sample time is:\t%f s\nThe corresponding frequency is:\t%f Hz\nOutput saved to:  %s' % (min_sampletime,1/min_sampletime,os.path.join('combined',file_prefix+'_results.csv')))
     
     # call the make_plot function and pass the location of the results file
-    make_plots('combined'+'/'+file_prefix+'_results.csv')
+    #make_plots('combined'+'/'+file_prefix+'_results.csv')
     
     # go back to the original directory so we can iterate through the rest of 
     # the files
