@@ -48,6 +48,7 @@ def make_plots(filename_in):
     plot_mode = True
     plot_rc = True
     plot_channels = True
+    plot_motors = True
     
     # directory that contains Plots directory
     path_to_Plots = os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots')
@@ -68,6 +69,7 @@ def make_plots(filename_in):
     mode_path = dir_Plots+'_Mode.png'
     channels_path = dir_Plots+'_Channels.png'
     rc_path = dir_Plots+'_RC.png'
+    motor_path = dir_Plots+'_Motors.png'
     
     # make a directory to save the plots if one does not exist and determine 
     # what needs to be plotted
@@ -97,6 +99,8 @@ def make_plots(filename_in):
         plot_channels = False
     if os.path.isfile(mode_path):
         plot_mode = False
+    if os.path.isfile(motor_path):
+        plot_motors = False
     
     # read in the data to a var called df (dataframe)
     df = pd.read_csv(filename, index_col=0, header=0)
@@ -254,20 +258,25 @@ def make_plots(filename_in):
     if plot_GPS:
         
         # try block to handle not finding the right data
-        try:
+        #try:
         
-            #Create a new figure to graph gps        
-            plt.figure()                    
-            plt.scatter(df['GPS.lat'],df["GPS.lon"])
-            plt.title('GPS')
-            plt.xlabel('Latitude')
-            plt.ylabel('Longitude')
-            plt.savefig(GPS_path,dpi=900,bbox_inche='tight')
-            
-            print('Plot GPS Lat and Lon')
+        #Create a new figure to graph gps        
+        plt.figure()
+        
+        # drop the zeros from when the GPS was booting up
+        df['GPS.lat'] = df['GPS.lat'][df['GPS.lat'] !=0.0]
+        df['GPS.lon'] = df['GPS.lon'][df['GPS.lon'] !=0.0]
+        
+        plt.scatter(df['GPS.lat'],df["GPS.lon"])
+        plt.title('GPS')
+        plt.xlabel('Latitude')
+        plt.ylabel('Longitude')
+        plt.savefig(GPS_path,dpi=900,bbox_inche='tight')
+        
+        print('Plot GPS Lat and Lon')
     
         # print report
-        except: print('Lat Lon data not found')
+        #except: print('Lat Lon data not found')
         
     else: 
         print('Lat Lon plot already exists for: '+just_the_filename[:-4])
@@ -329,7 +338,6 @@ def make_plots(filename_in):
             #Create a new figure to graph Mode
             plt.figure()
             plt.plot(df['time_seconds'],df["Mode"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Flight Mode')
             plt.xlabel('Time, s')
             plt.ylabel('Mode')
@@ -392,6 +400,33 @@ def make_plots(filename_in):
         
         # print report
         except: print('RC in data not found')
+     
+    else:
+        print('RC plots already exist for: '+just_the_filename[:-4])
+        
+    
+    if plot_motors:
+            
+        # try block to handle not finding the right data
+        try:
+            
+            # Create a new figure to gragh rc
+            plt.figure()
+            plt.plot(df['time_seconds'],df["Motor.RF"])
+            plt.plot(df['time_seconds'],df["Motor.LF"])
+            plt.plot(df['time_seconds'],df["Motor.RB"])
+            plt.plot(df['time_seconds'],df["Motor.LB"])
+            plt.title('Motors')
+            plt.xlabel('Time, s')
+            plt.ylabel('')
+            plt.legend(['Right Front','Left Front','Right Back','Left Back'])
+            
+            plt.savefig(motor_path,dpi=900,bbox_iche='tight')
+            
+            print('Plot Motors')
+        
+        # print report
+        except: print('Motors data not found')
      
     else:
         print('RC plots already exist for: '+just_the_filename[:-4])
