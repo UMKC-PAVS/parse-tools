@@ -21,6 +21,7 @@ Date:           07/08/2020
 import pandas as pd
 import os
 from matplotlib import pyplot as plt
+from numpy import nan
 #from tkinter.filedialog import askopenfilename
 # get filename from the dialogue
 #filename = askopenfilename(title='Select file',filetypes=[('csv files','*.csv')])
@@ -48,6 +49,7 @@ def make_plots(filename_in):
     plot_mode = True
     plot_rc = True
     plot_channels = True
+    plot_motors = True
     
     # directory that contains Plots directory
     path_to_Plots = os.path.join(os.path.dirname(os.path.dirname(just_the_pathname)),'Plots')
@@ -68,6 +70,7 @@ def make_plots(filename_in):
     mode_path = dir_Plots+'_Mode.png'
     channels_path = dir_Plots+'_Channels.png'
     rc_path = dir_Plots+'_RC.png'
+    motor_path = dir_Plots+'_Motors.png'
     
     # make a directory to save the plots if one does not exist and determine 
     # what needs to be plotted
@@ -84,7 +87,7 @@ def make_plots(filename_in):
     if os.path.isfile(batt_path):
         plot_batt = False
     if os.path.isfile(baro_path):
-        plot_gyro = False
+        plot_baro = False
     if os.path.isfile(GPS_path):
         plot_GPS = False
     if os.path.isfile(alt_path):
@@ -95,6 +98,10 @@ def make_plots(filename_in):
         plot_rc = False
     if os.path.isfile(channels_path):
         plot_channels = False
+    if os.path.isfile(mode_path):
+        plot_mode = False
+    if os.path.isfile(motor_path):
+        plot_motors = False
     
     # read in the data to a var called df (dataframe)
     df = pd.read_csv(filename, index_col=0, header=0)
@@ -111,7 +118,6 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df["Att.roll"])
             plt.plot(df['time_seconds'],df["Att.pitch"])
             plt.plot(df['time_seconds'],df["Att.yaw"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('R/P/Y')
             plt.xlabel('Time, s')
             plt.ylabel('Radians per Sec')
@@ -138,7 +144,6 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df['Accel.x'])
             plt.plot(df['time_seconds'],df['Accel.y'])
             plt.plot(df['time_seconds'],df['Accel.z'])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Accelerometer')
             plt.xlabel('Time, s')
             plt.ylabel('m/s^2')
@@ -146,7 +151,7 @@ def make_plots(filename_in):
             plt.savefig(accel_path,dpi=900,bbox_inche='tight')
             
             print('Plot Accelerometer')
-        
+    
         # print report
         except: print('Accelerometer data not found')
         
@@ -164,7 +169,6 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df['Gyro.x'])
             plt.plot(df['time_seconds'],df['Gyro.y'])
             plt.plot(df['time_seconds'],df['Gyro.z'])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Gyroscope')
             plt.xlabel('Time, s')
             plt.ylabel('Radians')
@@ -190,7 +194,6 @@ def make_plots(filename_in):
             plt.plot(df['time_seconds'],df["Mag.x"])
             plt.plot(df['time_seconds'],df["Mag.y"])
             plt.plot(df['time_seconds'],df["Mag.z"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Mag')
             plt.xlabel('Time, s')
             plt.ylabel('Gauss')
@@ -215,11 +218,9 @@ def make_plots(filename_in):
             #Create a new figure to graph batt
             plt.figure()
             plt.plot(df['time_seconds'],df["Voltage"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Battery_Voltage')
             plt.xlabel('Time, s')
             plt.ylabel('Volts')
-            plt.legend(['Battery_Voltage'])
             
             plt.savefig(batt_path,dpi=900,bbox_inche='tight')
             
@@ -240,7 +241,6 @@ def make_plots(filename_in):
             #Create a new figure to graph baro
             plt.figure()
             plt.plot(df['time_seconds'],df["BaroAlt"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('BaroAlt')
             plt.xlabel('Time, s')
             plt.ylabel('Meters')
@@ -260,15 +260,22 @@ def make_plots(filename_in):
         
         # try block to handle not finding the right data
         try:
-
-            #Create a new figure to graph gps
+        
+            #Create a new figure to graph gps        
             plt.figure()
-            plt.plot(df['GPS.lat'],df["GPS.lon"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
+            
+            # replace zeros with na
+            df['GPS.lat'] = df['GPS.lat'].replace(0, nan)
+            df['GPS.lon'] = df['GPS.lon'].replace(0, nan)
+            
+            # drop nan
+            df['GPS.lat'] = df['GPS.lat'].dropna(axis='index',how='any')
+            df['GPS.lon'] = df['GPS.lon'].dropna(axis='index',how='any')
+                 
+            plt.plot(df['GPS.lat'],df['GPS.lon'])
             plt.title('GPS')
             plt.xlabel('Latitude')
             plt.ylabel('Longitude')
-            
             plt.savefig(GPS_path,dpi=900,bbox_inche='tight')
             
             print('Plot GPS Lat and Lon')
@@ -288,7 +295,6 @@ def make_plots(filename_in):
             #Create a new figure to graph alt
             plt.figure()
             plt.plot(df['time_seconds'],df["GPS.alt"])
-            #plt.axvline(x=illumination, linewidth=0.5, color='red')
             plt.title('Alt')
             plt.xlabel('Time, s')
             plt.ylabel('Meters')
@@ -298,7 +304,7 @@ def make_plots(filename_in):
             print('Plot GPS Alt')
         
         # print report
-        except: print('Alt Vdop')
+        except: print('Altitude data not found')
         
     else: 
         print('Alt plot already exists for: '+just_the_filename[:-4])
@@ -340,7 +346,7 @@ def make_plots(filename_in):
             plt.title('Flight Mode')
             plt.xlabel('Time, s')
             plt.ylabel('Mode')
-    
+            
             plt.savefig(mode_path,dpi=900,bbox_inche='tight')
             
             print('Plot Mode')
@@ -359,17 +365,13 @@ def make_plots(filename_in):
 
             #Create a new figure to graph channels
             plt.figure()
-            plt.plot(df['time_seconds'],df["RC.Roll"])
-            plt.plot(df['time_seconds'],df["RC.Pitch"])
-            plt.plot(df['time_seconds'],df["RC.Throttle"])
-            plt.plot(df['time_seconds'],df["RC.Yaw"])
-            plt.plot(df['time_seconds'],df["Channels_in.4"])
-            plt.plot(df['time_seconds'],df["Channels_in.5"])
-            
+            plt.plot(df['time_seconds'],df["RC.aileron"])
+            plt.plot(df['time_seconds'],df["RC.rudder"])
+            plt.plot(df['time_seconds'],df["RC.Throttle"])        
             plt.title('RC channels')
             plt.xlabel('Time, s')
             plt.ylabel('Channels')
-            plt.legend(['Roll','Pitch','Throttle','Yaw','Channel 4','Channel 5'])
+            plt.legend(['aileron','rudder','throttle'])
 
             plt.savefig(channels_path,dpi=900,bbox_inche='tight')
             
@@ -390,12 +392,11 @@ def make_plots(filename_in):
             # Create a new figure to gragh rc
             plt.figure()
             plt.plot(df['time_seconds'],df["RC.Signalstrength"])
-            plt.plot(df['time_seconds'],df["RC.Failsafe"])
-            
+            #plt.plot(df['time_seconds'],df["RC.Failsafe"])
             plt.title('RC in')
             plt.xlabel('Time, s')
             plt.ylabel('RSSI')
-            plt.legend(['Signal Strength','Failsafe'])
+            plt.legend(['Signal Strength'])
             
             plt.savefig(rc_path,dpi=900,bbox_iche='tight')
             
@@ -406,6 +407,33 @@ def make_plots(filename_in):
      
     else:
         print('RC plots already exist for: '+just_the_filename[:-4])
+        
+    
+    if plot_motors:
+            
+        # try block to handle not finding the right data
+        try:
+            
+            # Create a new figure to gragh rc
+            plt.figure()
+            plt.plot(df['time_seconds'],df["Motor.RF"])
+            plt.plot(df['time_seconds'],df["Motor.LF"])
+            plt.plot(df['time_seconds'],df["Motor.RB"])
+            plt.plot(df['time_seconds'],df["Motor.LB"])
+            plt.title('Motors')
+            plt.xlabel('Time, s')
+            plt.ylabel('')
+            plt.legend(['Right Front','Left Front','Right Back','Left Back'])
+            
+            plt.savefig(motor_path,dpi=900,bbox_iche='tight')
+            
+            print('Plot Motors')
+        
+        # print report
+        except: print('Motors data not found')
+     
+    else:
+        print('Motors plots already exist for: '+just_the_filename[:-4])
         
     # close all plots
     plt.close('all')
