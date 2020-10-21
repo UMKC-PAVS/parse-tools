@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Oct 20 22:41:09 2020
-
-Rewrites PX4 csvs to correct naming structure
+10/18/20: Rewrites PX4 csvs to correct naming structure
 """
 
 
